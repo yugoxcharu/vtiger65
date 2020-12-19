@@ -142,6 +142,8 @@ class CustomView extends CRMEntity {
 		}
 	}
 
+	
+
 	// return type array
 	/** to get the details of a customview
 	 * @param $cvid :: Type Integer

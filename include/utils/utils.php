@@ -265,6 +265,22 @@ function return_app_list_strings_language($language) {
 	return Vtiger_Deprecated::return_app_list_strings_language($language);
 }
 
+
+
+function getViewIdByUser($userid, $module) {
+		global $adb;
+		if (isset($userid)) {
+			$query = "select cvid from vtiger_customview where userid=? and entitytype=?";
+			//echo $userid;die();
+			$cvresult = $adb->pquery($query, array($userid, $module));
+			$viewid = $adb->query_result($cvresult, 0, 'cvid');
+			//echo "Manmohan--".$viewid;die();
+			return $viewid;
+		} else {
+			return 0;
+		}
+}
+
 /**
  * Retrieve the app_currency_strings for the required language.
  */

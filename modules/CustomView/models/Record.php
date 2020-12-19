@@ -226,6 +226,7 @@ class CustomView_Record_Model extends Vtiger_Base_Model {
 		$viewName = $this->get('viewname');
 		$setDefault = intval($this->get('setdefault'));
 		$setMetrics = intval($this->get('setmetrics'));
+		$userid = intval($this->get('userid'));
 		$status = $this->get('status');
 
 		if($status == self::CV_STATUS_PENDING) {
@@ -233,19 +234,20 @@ class CustomView_Record_Model extends Vtiger_Base_Model {
 				$status = self::CV_STATUS_PUBLIC;
 			}
 		}
-
+		
+		$userid = ($userid)?$userid :$currentUserModel->getId();
 		if(!$cvId) {
 			$cvId = $db->getUniqueID("vtiger_customview");
 			$this->set('cvid', $cvId);
-
+			
 			$sql = 'INSERT INTO vtiger_customview(cvid, viewname, setdefault, setmetrics, entitytype, status, userid) VALUES (?,?,?,?,?,?,?)';
-			$params = array($cvId, $viewName, $setDefault, $setMetrics, $moduleName, $status, $currentUserModel->getId());
+			$params = array($cvId, $viewName, $setDefault, $setMetrics, $moduleName, $status, $userid);
 			$db->pquery($sql, $params);
 
 		} else {
 
-			$sql = 'UPDATE vtiger_customview SET viewname=?, setdefault=?, setmetrics=?, status=? WHERE cvid=?';
-			$params = array($viewName, $setDefault, $setMetrics, $status, $cvId);
+			$sql = 'UPDATE vtiger_customview SET viewname=?, setdefault=?, setmetrics=?, status=?,userid=? WHERE cvid=?';
+			$params = array($viewName, $setDefault, $setMetrics, $status, $cvId,$userid);
 			$db->pquery($sql, $params);
 
 			$db->pquery('DELETE FROM vtiger_cvcolumnlist WHERE cvid = ?', array($cvId));
@@ -256,20 +258,20 @@ class CustomView_Record_Model extends Vtiger_Base_Model {
 
 		if($setDefault == 1) {
 			$query = 'SELECT 1 FROM vtiger_user_module_preferences WHERE userid = ? AND tabid = ?';
-			$queryParams = array($currentUserModel->getId(), $moduleModel->getId());
+			$queryParams = array($userid, $moduleModel->getId());
 			$queryResult = $db->pquery($query, $queryParams);
 			if($db->num_rows($queryResult) > 0) {
 				$updateSql = 'UPDATE vtiger_user_module_preferences SET default_cvid = ? WHERE userid = ? AND tabid = ?';
-				$updateParams = array($cvId, $currentUserModel->getId(), $moduleModel->getId());
+				$updateParams = array($cvId, $userid, $moduleModel->getId());
 				$db->pquery($updateSql, $updateParams);
 			} else {
 				$insertSql = 'INSERT INTO vtiger_user_module_preferences(userid, tabid, default_cvid) VALUES (?,?,?)';
-				$insertParams = array($currentUserModel->getId(), $moduleModel->getId(), $cvId);
+				$insertParams = array($userid, $moduleModel->getId(), $cvId);
 				$db->pquery($insertSql, $insertParams);
 			}
 		} else {
 			$deleteSql = 'DELETE FROM vtiger_user_module_preferences WHERE userid = ? AND tabid = ? AND default_cvid = ?';
-			$deleteParams = array($currentUserModel->getId(), $moduleModel->getId(), $cvId);
+			$deleteParams = array($userid, $moduleModel->getId(), $cvId);
 			$db->pquery($deleteSql, $deleteParams);
 		}
 
@@ -290,7 +292,7 @@ class CustomView_Record_Model extends Vtiger_Base_Model {
 			//User Specific filterId
 			if(empty($defaultViewId)) {
 				$userDefaultModuleFilter = $db->pquery('SELECT default_cvid FROM vtiger_user_module_preferences WHERE
-											userid = ? AND tabid = ?', array($currentUserModel->id, $moduleModel->getId()));
+											userid = ? AND tabid = ?', array($userid, $moduleModel->getId()));
 				$defaultViewId = $db->query_result($userDefaultModuleFilter, 0, 'default_cvid');
 			}
 

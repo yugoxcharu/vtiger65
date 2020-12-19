@@ -53,8 +53,8 @@
                             <option value="{$OWNER_ID}" data-picklistvalue= '{$OWNER_NAME}'
                         {if array_key_exists($OWNER_ID, $ACCESSIBLE_GROUP_LIST)} data-recordaccess=true {else} data-recordaccess=false {/if} >
                         {$OWNER_NAME}
-                    </option>
-                {/foreach}
+                            </option>
+                        {/foreach}
             </optgroup>
         </select>
     </div>

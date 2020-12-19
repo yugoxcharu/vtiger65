@@ -37,7 +37,31 @@
                     <input type="text" id="viewname" data-validation-engine='validate[required]' name="viewname" value="{$CUSTOMVIEW_MODEL->get('viewname')}">&nbsp;&nbsp;&nbsp;
                     <label class="checkbox"><input id="setdefault" type="checkbox" name="setdefault" value="1" {if $CUSTOMVIEW_MODEL->isDefault()} checked="checked"{/if}>{vtranslate('LBL_SET_AS_DEFAULT',$MODULE)}</label>&nbsp;&nbsp;&nbsp;
                     <label class="checkbox"><input id="setmetrics" name="setmetrics" type="checkbox" value="1" {if $CUSTOMVIEW_MODEL->get('setmetrics') eq '1'} checked="checked"{/if}>{vtranslate('LBL_LIST_IN_METRICS',$MODULE)}</label>&nbsp;&nbsp;&nbsp;
-                    <label class="checkbox"><input id="status" name="status" type="checkbox" {if $CUSTOMVIEW_MODEL->isSetPublic()} value="{$CUSTOMVIEW_MODEL->get('status')}" checked="checked" {else} value="{$CV_PENDING_VALUE}" {/if}>{vtranslate('LBL_SET_AS_PUBLIC',$MODULE)}</label>
+                    <label class="checkbox"><input id="status" name="status" type="checkbox" {if $CUSTOMVIEW_MODEL->isSetPublic()} value="{$CUSTOMVIEW_MODEL->get('status')}" checked="checked" {else} value="{$CV_PENDING_VALUE}" {/if}>{vtranslate('LBL_SET_AS_PUBLIC',$MODULE)}</label>&nbsp;&nbsp;&nbsp;
+                    {if $SOURCE_MODULE eq 'Leads'}
+                    <label>
+                        
+                        {assign var=ALL_ACTIVEUSER_LIST value=$USER_MODEL->getAccessibleUsers()}
+                        {assign var=ALL_ACTIVEGROUP_LIST value=$USER_MODEL->getAccessibleGroups()}
+                        {assign var=CURRENT_USER_ID value=$USER_MODEL->get('id')}
+                        {assign var=ACCESSIBLE_USER_LIST value=$USER_MODEL->getAccessibleUsersForModule($MODULE)}
+                        {assign var=ACCESSIBLE_GROUP_LIST value=$USER_MODEL->getAccessibleGroupForModule($MODULE)}
+
+                        <select class="chzn-select" name="userid" id="userid">
+                            <optgroup label="{vtranslate('LBL_USERS')}">
+                                <option value="" data-picklistvalue="" >Please select</option>
+                                {foreach key=OWNER_ID item=OWNER_NAME from=$ALL_ACTIVEUSER_LIST}
+                                    <option value="{$OWNER_ID}" data-picklistvalue= '{$OWNER_NAME}' {if $CUSTOMVIEW_MODEL->get('userid') eq $OWNER_ID} selected {/if}
+                                {if array_key_exists($OWNER_ID, $ACCESSIBLE_USER_LIST)} data-recordaccess=true {else} data-recordaccess=false {/if}
+                                data-userId="{$CURRENT_USER_ID}">
+                                {$OWNER_NAME}
+                            </option>
+                        {/foreach}
+                    </optgroup>
+                    
+                    </select>
+                    </label>
+                    {/if}
                 </div>
                 <br>
                 <h4 class="filterHeaders">{vtranslate('LBL_CHOOSE_COLUMNS',$MODULE)} ({vtranslate('LBL_MAX_NUMBER_FILTER_COLUMNS')}) :</h4>
